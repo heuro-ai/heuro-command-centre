@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAmc } from "@/mock/store";
 import { startMockConnector } from "@/mock/connector";
 import { Sidebar } from "@/components/amc/Sidebar";
@@ -13,22 +13,28 @@ export const Route = createFileRoute("/_app")({
 function AppShell() {
   const connected = useAmc((s) => s.connected);
   const navigate = useNavigate();
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      useAmc.persist?.rehydrate?.();
+    // wait for zustand persist to rehydrate from localStorage
+    if (useAmc.persist?.hasHydrated?.()) {
+      setHydrated(true);
+    } else {
+      const unsub = useAmc.persist?.onFinishHydration?.(() => setHydrated(true));
+      return () => unsub?.();
     }
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!connected) {
       navigate({ to: "/connect", replace: true });
     } else {
       startMockConnector();
     }
-  }, [connected, navigate]);
+  }, [connected, navigate, hydrated]);
 
-  if (!connected) return null;
+  if (!hydrated || !connected) return null;
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">

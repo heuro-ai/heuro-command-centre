@@ -42,8 +42,8 @@ function TrustCenter() {
 
       {tab === "Sources" && (
         <div className="space-y-2">
-          {allSources.map((s) => (
-            <div key={s.id + s.url} className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          {Array.from(new Map(allSources.map((s) => [s.id, s])).values()).map((s) => (
+            <div key={s.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface p-3">
               <div className="min-w-0">
                 <div className="truncate text-sm">{s.title}</div>
                 <div className="truncate font-mono text-[11px] text-muted-foreground">{s.domain}</div>
