@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useAmc } from "@/mock/store";
-import { startMockConnector } from "@/mock/connector";
+// connector intentionally disabled in MVP demo build
 import { Sidebar } from "@/components/amc/Sidebar";
 import { BottomNav } from "@/components/amc/BottomNav";
 import { HealthBar, DesktopHealthStrip } from "@/components/amc/HealthBar";
@@ -19,11 +19,7 @@ function AppShell() {
 
   useEffect(() => {
     if (!mounted) return;
-    if (!connected) {
-      navigate({ to: "/connect", replace: true });
-    } else {
-      startMockConnector();
-    }
+    if (!connected) navigate({ to: "/connect", replace: true });
   }, [connected, navigate, mounted]);
 
   if (!mounted) return null;
