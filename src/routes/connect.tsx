@@ -24,7 +24,7 @@ export const Route = createFileRoute("/connect")({
   component: ConnectWizard,
 });
 
-type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type Step = number;
 type Method = "local" | "remote" | "demo";
 
 const STEPS = ["Welcome", "Method", "Install", "Pair", "Permissions", "Check", "Done"];
