@@ -14,7 +14,12 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTrustRouteImport } from './routes/_app.trust'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppMissionsRouteImport } from './routes/_app.missions'
 import { Route as AppHealthRouteImport } from './routes/_app.health'
+import { Route as AppChatRouteImport } from './routes/_app.chat'
+import { Route as AppAutomationsRouteImport } from './routes/_app.automations'
+import { Route as AppArtifactsRouteImport } from './routes/_app.artifacts'
+import { Route as AppApprovalsRouteImport } from './routes/_app.approvals'
 import { Route as AppMissionsIndexRouteImport } from './routes/_app.missions.index'
 import { Route as AppChatIndexRouteImport } from './routes/_app.chat.index'
 import { Route as AppAutomationsIndexRouteImport } from './routes/_app.automations.index'
@@ -50,66 +55,96 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMissionsRoute = AppMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppHealthRoute = AppHealthRouteImport.update({
   id: '/health',
   path: '/health',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMissionsIndexRoute = AppMissionsIndexRouteImport.update({
-  id: '/missions/',
-  path: '/missions/',
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => AppRoute,
+} as any)
+const AppAutomationsRoute = AppAutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppArtifactsRoute = AppArtifactsRouteImport.update({
+  id: '/artifacts',
+  path: '/artifacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppApprovalsRoute = AppApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMissionsIndexRoute = AppMissionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppMissionsRoute,
 } as any)
 const AppChatIndexRoute = AppChatIndexRouteImport.update({
-  id: '/chat/',
-  path: '/chat/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppChatRoute,
 } as any)
 const AppAutomationsIndexRoute = AppAutomationsIndexRouteImport.update({
-  id: '/automations/',
-  path: '/automations/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAutomationsRoute,
 } as any)
 const AppArtifactsIndexRoute = AppArtifactsIndexRouteImport.update({
-  id: '/artifacts/',
-  path: '/artifacts/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppArtifactsRoute,
 } as any)
 const AppApprovalsIndexRoute = AppApprovalsIndexRouteImport.update({
-  id: '/approvals/',
-  path: '/approvals/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppApprovalsRoute,
 } as any)
 const AppMissionsMissionIdRoute = AppMissionsMissionIdRouteImport.update({
-  id: '/missions/$missionId',
-  path: '/missions/$missionId',
-  getParentRoute: () => AppRoute,
+  id: '/$missionId',
+  path: '/$missionId',
+  getParentRoute: () => AppMissionsRoute,
 } as any)
 const AppChatMissionIdRoute = AppChatMissionIdRouteImport.update({
-  id: '/chat/$missionId',
-  path: '/chat/$missionId',
-  getParentRoute: () => AppRoute,
+  id: '/$missionId',
+  path: '/$missionId',
+  getParentRoute: () => AppChatRoute,
 } as any)
 const AppAutomationsJobIdRoute = AppAutomationsJobIdRouteImport.update({
-  id: '/automations/$jobId',
-  path: '/automations/$jobId',
-  getParentRoute: () => AppRoute,
+  id: '/$jobId',
+  path: '/$jobId',
+  getParentRoute: () => AppAutomationsRoute,
 } as any)
 const AppArtifactsArtifactIdRoute = AppArtifactsArtifactIdRouteImport.update({
-  id: '/artifacts/$artifactId',
-  path: '/artifacts/$artifactId',
-  getParentRoute: () => AppRoute,
+  id: '/$artifactId',
+  path: '/$artifactId',
+  getParentRoute: () => AppArtifactsRoute,
 } as any)
 const AppApprovalsApprovalIdRoute = AppApprovalsApprovalIdRouteImport.update({
-  id: '/approvals/$approvalId',
-  path: '/approvals/$approvalId',
-  getParentRoute: () => AppRoute,
+  id: '/$approvalId',
+  path: '/$approvalId',
+  getParentRoute: () => AppApprovalsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
+  '/approvals': typeof AppApprovalsRouteWithChildren
+  '/artifacts': typeof AppArtifactsRouteWithChildren
+  '/automations': typeof AppAutomationsRouteWithChildren
+  '/chat': typeof AppChatRouteWithChildren
   '/health': typeof AppHealthRoute
+  '/missions': typeof AppMissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/trust': typeof AppTrustRoute
   '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
@@ -145,7 +180,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/connect': typeof ConnectRoute
+  '/_app/approvals': typeof AppApprovalsRouteWithChildren
+  '/_app/artifacts': typeof AppArtifactsRouteWithChildren
+  '/_app/automations': typeof AppAutomationsRouteWithChildren
+  '/_app/chat': typeof AppChatRouteWithChildren
   '/_app/health': typeof AppHealthRoute
+  '/_app/missions': typeof AppMissionsRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_app/trust': typeof AppTrustRoute
   '/_app/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
@@ -164,7 +204,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/connect'
+    | '/approvals'
+    | '/artifacts'
+    | '/automations'
+    | '/chat'
     | '/health'
+    | '/missions'
     | '/settings'
     | '/trust'
     | '/approvals/$approvalId'
@@ -199,7 +244,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/connect'
+    | '/_app/approvals'
+    | '/_app/artifacts'
+    | '/_app/automations'
+    | '/_app/chat'
     | '/_app/health'
+    | '/_app/missions'
     | '/_app/settings'
     | '/_app/trust'
     | '/_app/approvals/$approvalId'
@@ -257,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/missions': {
+      id: '/_app/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AppMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/health': {
       id: '/_app/health'
       path: '/health'
@@ -264,109 +321,196 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHealthRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/chat': {
+      id: '/_app/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/automations': {
+      id: '/_app/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AppAutomationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/artifacts': {
+      id: '/_app/artifacts'
+      path: '/artifacts'
+      fullPath: '/artifacts'
+      preLoaderRoute: typeof AppArtifactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/approvals': {
+      id: '/_app/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof AppApprovalsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/missions/': {
       id: '/_app/missions/'
-      path: '/missions'
+      path: '/'
       fullPath: '/missions/'
       preLoaderRoute: typeof AppMissionsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppMissionsRoute
     }
     '/_app/chat/': {
       id: '/_app/chat/'
-      path: '/chat'
+      path: '/'
       fullPath: '/chat/'
       preLoaderRoute: typeof AppChatIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppChatRoute
     }
     '/_app/automations/': {
       id: '/_app/automations/'
-      path: '/automations'
+      path: '/'
       fullPath: '/automations/'
       preLoaderRoute: typeof AppAutomationsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppAutomationsRoute
     }
     '/_app/artifacts/': {
       id: '/_app/artifacts/'
-      path: '/artifacts'
+      path: '/'
       fullPath: '/artifacts/'
       preLoaderRoute: typeof AppArtifactsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppArtifactsRoute
     }
     '/_app/approvals/': {
       id: '/_app/approvals/'
-      path: '/approvals'
+      path: '/'
       fullPath: '/approvals/'
       preLoaderRoute: typeof AppApprovalsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppApprovalsRoute
     }
     '/_app/missions/$missionId': {
       id: '/_app/missions/$missionId'
-      path: '/missions/$missionId'
+      path: '/$missionId'
       fullPath: '/missions/$missionId'
       preLoaderRoute: typeof AppMissionsMissionIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppMissionsRoute
     }
     '/_app/chat/$missionId': {
       id: '/_app/chat/$missionId'
-      path: '/chat/$missionId'
+      path: '/$missionId'
       fullPath: '/chat/$missionId'
       preLoaderRoute: typeof AppChatMissionIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppChatRoute
     }
     '/_app/automations/$jobId': {
       id: '/_app/automations/$jobId'
-      path: '/automations/$jobId'
+      path: '/$jobId'
       fullPath: '/automations/$jobId'
       preLoaderRoute: typeof AppAutomationsJobIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppAutomationsRoute
     }
     '/_app/artifacts/$artifactId': {
       id: '/_app/artifacts/$artifactId'
-      path: '/artifacts/$artifactId'
+      path: '/$artifactId'
       fullPath: '/artifacts/$artifactId'
       preLoaderRoute: typeof AppArtifactsArtifactIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppArtifactsRoute
     }
     '/_app/approvals/$approvalId': {
       id: '/_app/approvals/$approvalId'
-      path: '/approvals/$approvalId'
+      path: '/$approvalId'
       fullPath: '/approvals/$approvalId'
       preLoaderRoute: typeof AppApprovalsApprovalIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppApprovalsRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppHealthRoute: typeof AppHealthRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-  AppTrustRoute: typeof AppTrustRoute
+interface AppApprovalsRouteChildren {
   AppApprovalsApprovalIdRoute: typeof AppApprovalsApprovalIdRoute
-  AppArtifactsArtifactIdRoute: typeof AppArtifactsArtifactIdRoute
-  AppAutomationsJobIdRoute: typeof AppAutomationsJobIdRoute
-  AppChatMissionIdRoute: typeof AppChatMissionIdRoute
-  AppMissionsMissionIdRoute: typeof AppMissionsMissionIdRoute
   AppApprovalsIndexRoute: typeof AppApprovalsIndexRoute
+}
+
+const AppApprovalsRouteChildren: AppApprovalsRouteChildren = {
+  AppApprovalsApprovalIdRoute: AppApprovalsApprovalIdRoute,
+  AppApprovalsIndexRoute: AppApprovalsIndexRoute,
+}
+
+const AppApprovalsRouteWithChildren = AppApprovalsRoute._addFileChildren(
+  AppApprovalsRouteChildren,
+)
+
+interface AppArtifactsRouteChildren {
+  AppArtifactsArtifactIdRoute: typeof AppArtifactsArtifactIdRoute
   AppArtifactsIndexRoute: typeof AppArtifactsIndexRoute
+}
+
+const AppArtifactsRouteChildren: AppArtifactsRouteChildren = {
+  AppArtifactsArtifactIdRoute: AppArtifactsArtifactIdRoute,
+  AppArtifactsIndexRoute: AppArtifactsIndexRoute,
+}
+
+const AppArtifactsRouteWithChildren = AppArtifactsRoute._addFileChildren(
+  AppArtifactsRouteChildren,
+)
+
+interface AppAutomationsRouteChildren {
+  AppAutomationsJobIdRoute: typeof AppAutomationsJobIdRoute
   AppAutomationsIndexRoute: typeof AppAutomationsIndexRoute
+}
+
+const AppAutomationsRouteChildren: AppAutomationsRouteChildren = {
+  AppAutomationsJobIdRoute: AppAutomationsJobIdRoute,
+  AppAutomationsIndexRoute: AppAutomationsIndexRoute,
+}
+
+const AppAutomationsRouteWithChildren = AppAutomationsRoute._addFileChildren(
+  AppAutomationsRouteChildren,
+)
+
+interface AppChatRouteChildren {
+  AppChatMissionIdRoute: typeof AppChatMissionIdRoute
   AppChatIndexRoute: typeof AppChatIndexRoute
+}
+
+const AppChatRouteChildren: AppChatRouteChildren = {
+  AppChatMissionIdRoute: AppChatMissionIdRoute,
+  AppChatIndexRoute: AppChatIndexRoute,
+}
+
+const AppChatRouteWithChildren =
+  AppChatRoute._addFileChildren(AppChatRouteChildren)
+
+interface AppMissionsRouteChildren {
+  AppMissionsMissionIdRoute: typeof AppMissionsMissionIdRoute
   AppMissionsIndexRoute: typeof AppMissionsIndexRoute
 }
 
+const AppMissionsRouteChildren: AppMissionsRouteChildren = {
+  AppMissionsMissionIdRoute: AppMissionsMissionIdRoute,
+  AppMissionsIndexRoute: AppMissionsIndexRoute,
+}
+
+const AppMissionsRouteWithChildren = AppMissionsRoute._addFileChildren(
+  AppMissionsRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppApprovalsRoute: typeof AppApprovalsRouteWithChildren
+  AppArtifactsRoute: typeof AppArtifactsRouteWithChildren
+  AppAutomationsRoute: typeof AppAutomationsRouteWithChildren
+  AppChatRoute: typeof AppChatRouteWithChildren
+  AppHealthRoute: typeof AppHealthRoute
+  AppMissionsRoute: typeof AppMissionsRouteWithChildren
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTrustRoute: typeof AppTrustRoute
+}
+
 const AppRouteChildren: AppRouteChildren = {
+  AppApprovalsRoute: AppApprovalsRouteWithChildren,
+  AppArtifactsRoute: AppArtifactsRouteWithChildren,
+  AppAutomationsRoute: AppAutomationsRouteWithChildren,
+  AppChatRoute: AppChatRouteWithChildren,
   AppHealthRoute: AppHealthRoute,
+  AppMissionsRoute: AppMissionsRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppTrustRoute: AppTrustRoute,
-  AppApprovalsApprovalIdRoute: AppApprovalsApprovalIdRoute,
-  AppArtifactsArtifactIdRoute: AppArtifactsArtifactIdRoute,
-  AppAutomationsJobIdRoute: AppAutomationsJobIdRoute,
-  AppChatMissionIdRoute: AppChatMissionIdRoute,
-  AppMissionsMissionIdRoute: AppMissionsMissionIdRoute,
-  AppApprovalsIndexRoute: AppApprovalsIndexRoute,
-  AppArtifactsIndexRoute: AppArtifactsIndexRoute,
-  AppAutomationsIndexRoute: AppAutomationsIndexRoute,
-  AppChatIndexRoute: AppChatIndexRoute,
-  AppMissionsIndexRoute: AppMissionsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
