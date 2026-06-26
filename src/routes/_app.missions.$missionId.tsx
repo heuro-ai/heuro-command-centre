@@ -92,7 +92,7 @@ function MissionDetail() {
         <div className="lg:col-span-2">
           <SectionHeader title="Timeline" />
           <div className="rounded-lg border border-border bg-surface p-4">
-            <MissionTimeline steps={mission.steps} />
+            TIMELINE PLACEHOLDER
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
