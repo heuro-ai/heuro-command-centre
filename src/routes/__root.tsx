@@ -90,9 +90,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Mission Control" },
       { property: "og:title", content: "Agent Mission Control" },
-      { property: "og:description", content: "The operational command center for autonomous agents." },
+      { property: "og:description", content: "Mission control for AI agents. Supervise Hermes and OpenClaw missions, approvals, artifacts, and automations in one operational dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Agent Mission Control" },
+      { name: "twitter:description", content: "Mission control for AI agents. Supervise Hermes and OpenClaw missions, approvals, artifacts, and automations in one operational dashboard." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/36894cf8-7270-4d49-892c-c45c809af759/id-preview-62fa19aa--01851331-3b6b-4a84-af75-a592932875bc.lovable.app-1782469872239.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/36894cf8-7270-4d49-892c-c45c809af759/id-preview-62fa19aa--01851331-3b6b-4a84-af75-a592932875bc.lovable.app-1782469872239.png" },
     ],
     links: [
       {
