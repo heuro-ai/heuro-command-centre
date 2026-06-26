@@ -9,38 +9,129 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppMissionsRouteImport } from './routes/_app.missions'
+import { Route as AppArtifactsRouteImport } from './routes/_app.artifacts'
+import { Route as AppApprovalsRouteImport } from './routes/_app.approvals'
+import { Route as AppMissionsMissionIdRouteImport } from './routes/_app.missions.$missionId'
+import { Route as AppArtifactsArtifactIdRouteImport } from './routes/_app.artifacts.$artifactId'
+import { Route as AppApprovalsApprovalIdRouteImport } from './routes/_app.approvals.$approvalId'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMissionsRoute = AppMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppArtifactsRoute = AppArtifactsRouteImport.update({
+  id: '/artifacts',
+  path: '/artifacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppApprovalsRoute = AppApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMissionsMissionIdRoute = AppMissionsMissionIdRouteImport.update({
+  id: '/$missionId',
+  path: '/$missionId',
+  getParentRoute: () => AppMissionsRoute,
+} as any)
+const AppArtifactsArtifactIdRoute = AppArtifactsArtifactIdRouteImport.update({
+  id: '/$artifactId',
+  path: '/$artifactId',
+  getParentRoute: () => AppArtifactsRoute,
+} as any)
+const AppApprovalsApprovalIdRoute = AppApprovalsApprovalIdRouteImport.update({
+  id: '/$approvalId',
+  path: '/$approvalId',
+  getParentRoute: () => AppApprovalsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/approvals': typeof AppApprovalsRouteWithChildren
+  '/artifacts': typeof AppArtifactsRouteWithChildren
+  '/missions': typeof AppMissionsRouteWithChildren
+  '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
+  '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/approvals': typeof AppApprovalsRouteWithChildren
+  '/artifacts': typeof AppArtifactsRouteWithChildren
+  '/missions': typeof AppMissionsRouteWithChildren
+  '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
+  '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/approvals': typeof AppApprovalsRouteWithChildren
+  '/_app/artifacts': typeof AppArtifactsRouteWithChildren
+  '/_app/missions': typeof AppMissionsRouteWithChildren
+  '/_app/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
+  '/_app/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/_app/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/approvals'
+    | '/artifacts'
+    | '/missions'
+    | '/approvals/$approvalId'
+    | '/artifacts/$artifactId'
+    | '/missions/$missionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/approvals'
+    | '/artifacts'
+    | '/missions'
+    | '/approvals/$approvalId'
+    | '/artifacts/$artifactId'
+    | '/missions/$missionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/approvals'
+    | '/_app/artifacts'
+    | '/_app/missions'
+    | '/_app/approvals/$approvalId'
+    | '/_app/artifacts/$artifactId'
+    | '/_app/missions/$missionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +139,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/missions': {
+      id: '/_app/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AppMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/artifacts': {
+      id: '/_app/artifacts'
+      path: '/artifacts'
+      fullPath: '/artifacts'
+      preLoaderRoute: typeof AppArtifactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/approvals': {
+      id: '/_app/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof AppApprovalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/missions/$missionId': {
+      id: '/_app/missions/$missionId'
+      path: '/$missionId'
+      fullPath: '/missions/$missionId'
+      preLoaderRoute: typeof AppMissionsMissionIdRouteImport
+      parentRoute: typeof AppMissionsRoute
+    }
+    '/_app/artifacts/$artifactId': {
+      id: '/_app/artifacts/$artifactId'
+      path: '/$artifactId'
+      fullPath: '/artifacts/$artifactId'
+      preLoaderRoute: typeof AppArtifactsArtifactIdRouteImport
+      parentRoute: typeof AppArtifactsRoute
+    }
+    '/_app/approvals/$approvalId': {
+      id: '/_app/approvals/$approvalId'
+      path: '/$approvalId'
+      fullPath: '/approvals/$approvalId'
+      preLoaderRoute: typeof AppApprovalsApprovalIdRouteImport
+      parentRoute: typeof AppApprovalsRoute
+    }
   }
 }
 
+interface AppApprovalsRouteChildren {
+  AppApprovalsApprovalIdRoute: typeof AppApprovalsApprovalIdRoute
+}
+
+const AppApprovalsRouteChildren: AppApprovalsRouteChildren = {
+  AppApprovalsApprovalIdRoute: AppApprovalsApprovalIdRoute,
+}
+
+const AppApprovalsRouteWithChildren = AppApprovalsRoute._addFileChildren(
+  AppApprovalsRouteChildren,
+)
+
+interface AppArtifactsRouteChildren {
+  AppArtifactsArtifactIdRoute: typeof AppArtifactsArtifactIdRoute
+}
+
+const AppArtifactsRouteChildren: AppArtifactsRouteChildren = {
+  AppArtifactsArtifactIdRoute: AppArtifactsArtifactIdRoute,
+}
+
+const AppArtifactsRouteWithChildren = AppArtifactsRoute._addFileChildren(
+  AppArtifactsRouteChildren,
+)
+
+interface AppMissionsRouteChildren {
+  AppMissionsMissionIdRoute: typeof AppMissionsMissionIdRoute
+}
+
+const AppMissionsRouteChildren: AppMissionsRouteChildren = {
+  AppMissionsMissionIdRoute: AppMissionsMissionIdRoute,
+}
+
+const AppMissionsRouteWithChildren = AppMissionsRoute._addFileChildren(
+  AppMissionsRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppApprovalsRoute: typeof AppApprovalsRouteWithChildren
+  AppArtifactsRoute: typeof AppArtifactsRouteWithChildren
+  AppMissionsRoute: typeof AppMissionsRouteWithChildren
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppApprovalsRoute: AppApprovalsRouteWithChildren,
+  AppArtifactsRoute: AppArtifactsRouteWithChildren,
+  AppMissionsRoute: AppMissionsRouteWithChildren,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
