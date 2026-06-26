@@ -28,9 +28,10 @@ export const Route = createFileRoute("/_app/missions/$missionId")({
 function MissionDetail() {
   const { missionId } = Route.useParams();
   const mission = useAmc((s) => s.missions.find((m) => m.id === missionId));
-  const artifacts = useAmc((s) =>
-    s.artifacts.filter((a) => mission?.artifact_ids.includes(a.id)),
-  );
+  const allArtifacts = useAmc((s) => s.artifacts);
+  const artifacts = mission
+    ? allArtifacts.filter((a) => mission.artifact_ids.includes(a.id))
+    : [];
   const [logsOpen, setLogsOpen] = useState(false);
 
   if (!mission) throw notFound();

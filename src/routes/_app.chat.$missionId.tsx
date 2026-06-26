@@ -24,7 +24,8 @@ function ChatPage() {
   const { missionId } = Route.useParams();
   const mission = useAmc((s) => s.missions.find((m) => m.id === missionId));
   const missions = useAmc((s) => s.missions);
-  const chat = useAmc((s) => s.chat.filter((c) => c.mission_id === missionId));
+  const allChat = useAmc((s) => s.chat);
+  const chat = allChat.filter((c) => c.mission_id === missionId);
   const artifacts = useAmc((s) => s.artifacts);
   const approvals = useAmc((s) => s.approvals);
   const addChat = useAmc((s) => s.addChat);
