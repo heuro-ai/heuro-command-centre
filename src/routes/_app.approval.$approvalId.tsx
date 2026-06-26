@@ -4,7 +4,7 @@ import { ApprovalCard } from "@/components/amc/ApprovalCard";
 import { PageHeader } from "@/components/amc/PageHeader";
 import { SectionHeader } from "@/components/amc/primitives";
 
-export const Route = createFileRoute("/_app/approvals/$approvalId")({
+export const Route = createFileRoute("/_app/approval/$approvalId")({
   component: ApprovalDetail,
 });
 
@@ -28,7 +28,7 @@ function ApprovalDetail() {
         <section className="mt-6">
           <SectionHeader title="Attached artifact" />
           <Link
-            to="/artifacts/$artifactId"
+            to="/artifact/$artifactId"
             params={{ artifactId: artifact.id }}
             className="block rounded-lg border border-border bg-surface p-4 hover:border-accent-cyan/30"
           >

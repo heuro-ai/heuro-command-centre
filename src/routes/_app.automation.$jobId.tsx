@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/amc/PageHeader";
 import { MonoId, RelativeTime, SectionHeader, Sparkline, StatusChip } from "@/components/amc/primitives";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_app/automations/$jobId")({
+export const Route = createFileRoute("/_app/automation/$jobId")({
   component: AutomationDetail,
 });
 

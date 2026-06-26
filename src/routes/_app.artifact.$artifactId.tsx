@@ -7,7 +7,7 @@ import { ConfidenceBar, MonoId, RelativeTime, SectionHeader, StatusChip } from "
 import { SourceCard } from "@/components/amc/SourceCard";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_app/artifacts/$artifactId")({
+export const Route = createFileRoute("/_app/artifact/$artifactId")({
   component: ArtifactDetail,
 });
 

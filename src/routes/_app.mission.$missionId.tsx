@@ -16,7 +16,7 @@ import { MissionTimeline } from "@/components/amc/MissionTimeline";
 import { SourceCard } from "@/components/amc/SourceCard";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_app/missions/$missionId")({
+export const Route = createFileRoute("/_app/mission/$missionId")({
   component: MissionDetail,
   notFoundComponent: () => (
     <div className="rounded-lg border border-border bg-surface p-8 text-center text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ function _MissionDetailFull() {
             <Button size="sm" variant="outline" className="gap-1.5"><Play className="h-3.5 w-3.5" /> Resume</Button>
             <Button size="sm" variant="outline" className="gap-1.5"><RotateCcw className="h-3.5 w-3.5" /> Retry step</Button>
             <Button size="sm" variant="outline" className="gap-1.5 text-status-fail border-status-fail/40 hover:bg-status-fail/10"><Square className="h-3.5 w-3.5" /> Cancel</Button>
-            <Link to="/chat/$missionId" params={{ missionId: mission.id }}>
+            <Link to="/thread/$missionId" params={{ missionId: mission.id }}>
               <Button size="sm" className="gap-1.5 bg-accent-cyan text-background hover:bg-accent-cyan/90">
                 <Bot className="h-3.5 w-3.5" /> Ask Hermes what's blocked
               </Button>
@@ -136,7 +136,7 @@ function _MissionDetailFull() {
               {artifacts.map((a) => (
                 <Link
                   key={a.id}
-                  to="/artifacts/$artifactId"
+                  to="/artifact/$artifactId"
                   params={{ artifactId: a.id }}
                   className="block rounded-lg border border-border bg-surface p-3 hover:border-accent-cyan/30"
                 >

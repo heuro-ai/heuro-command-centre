@@ -7,7 +7,7 @@ import { MonoId, StatusChip } from "@/components/amc/primitives";
 import { ApprovalCard } from "@/components/amc/ApprovalCard";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_app/chat/$missionId")({
+export const Route = createFileRoute("/_app/thread/$missionId")({
   component: ChatPage,
 });
 
@@ -60,7 +60,7 @@ function ChatPage() {
         {missions.map((m) => (
           <Link
             key={m.id}
-            to="/chat/$missionId"
+            to="/thread/$missionId"
             params={{ missionId: m.id }}
             className={cn(
               "shrink-0 rounded-md border px-2.5 py-1.5 text-xs",
@@ -76,7 +76,7 @@ function ChatPage() {
         <span className="text-muted-foreground">Context:</span>
         <MonoId>{mission.id}</MonoId>
         <StatusChip status={mission.status} />
-        <Link to="/missions/$missionId" params={{ missionId }} className="ml-auto text-accent-cyan hover:underline">Open mission</Link>
+        <Link to="/mission/$missionId" params={{ missionId }} className="ml-auto text-accent-cyan hover:underline">Open mission</Link>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
@@ -116,7 +116,7 @@ function ChatPage() {
                   const a = artifacts.find((x) => x.id === card.artifact_id);
                   return a ? (
                     <Link
-                      to="/artifacts/$artifactId"
+                      to="/artifact/$artifactId"
                       params={{ artifactId: a.id }}
                       className="block rounded-lg border border-border bg-surface p-3 hover:border-accent-cyan/30"
                     >
