@@ -27,19 +27,19 @@ export const Route = createFileRoute("/_app/missions/$missionId")({
 
 function MissionDetail() {
   const { missionId } = Route.useParams();
+  return <div>STUB {missionId}</div>;
+}
+
+function _MissionDetailFull() {
+  const { missionId } = Route.useParams();
   const mission = useAmc((s) => s.missions.find((m) => m.id === missionId));
   const allArtifacts = useAmc((s) => s.artifacts);
   const artifacts = mission
     ? allArtifacts.filter((a) => mission.artifact_ids.includes(a.id))
     : [];
   const [logsOpen, setLogsOpen] = useState(false);
-
   if (!mission) {
-    return (
-      <div className="rounded-lg border border-border bg-surface p-8 text-center text-sm text-muted-foreground">
-        Mission not found.
-      </div>
-    );
+    return <div>Mission not found.</div>;
   }
 
   const stalledMins = Math.round(
