@@ -15,7 +15,7 @@ function ApprovalDetail() {
     approval?.artifact_id ? s.artifacts.find((a) => a.id === approval.artifact_id) : undefined,
   );
 
-  if (!approval) throw notFound();
+  if (!approval) return <div className="p-6 text-sm text-muted-foreground">Approval not found.</div>;
 
   return (
     <>

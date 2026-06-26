@@ -31,7 +31,7 @@ function ChatPage() {
   const addChat = useAmc((s) => s.addChat);
   const [input, setInput] = useState("");
 
-  if (!mission) throw notFound();
+  if (!mission) return <div className="p-6 text-sm text-muted-foreground">Mission not found.</div>;
 
   const send = (text: string) => {
     if (!text.trim()) return;

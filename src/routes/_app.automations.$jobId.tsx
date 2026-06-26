@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_app/automations/$jobId")({
 function AutomationDetail() {
   const { jobId } = Route.useParams();
   const job = useAmc((s) => s.automations.find((a) => a.id === jobId));
-  if (!job) throw notFound();
+  if (!job) return <div className="p-6 text-sm text-muted-foreground">Automation not found.</div>;
 
   const durations = job.runs.map((r) => r.duration_ms ?? 0).reverse();
 

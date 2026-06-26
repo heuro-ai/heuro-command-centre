@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_app/artifacts/$artifactId")({
 function ArtifactDetail() {
   const { artifactId } = Route.useParams();
   const artifact = useAmc((s) => s.artifacts.find((a) => a.id === artifactId));
-  if (!artifact) throw notFound();
+  if (!artifact) return <div className="p-6 text-sm text-muted-foreground">Artifact not found.</div>;
 
   return (
     <>

@@ -34,7 +34,13 @@ function MissionDetail() {
     : [];
   const [logsOpen, setLogsOpen] = useState(false);
 
-  if (!mission) throw notFound();
+  if (!mission) {
+    return (
+      <div className="rounded-lg border border-border bg-surface p-8 text-center text-sm text-muted-foreground">
+        Mission not found.
+      </div>
+    );
+  }
 
   const stalledMins = Math.round(
     (Date.now() - new Date(mission.last_verified_progress_at).getTime()) / 60_000,
