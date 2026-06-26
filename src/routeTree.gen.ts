@@ -11,10 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTrustRouteImport } from './routes/_app.trust'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppMissionsRouteImport } from './routes/_app.missions'
+import { Route as AppHealthRouteImport } from './routes/_app.health'
+import { Route as AppAutomationsRouteImport } from './routes/_app.automations'
 import { Route as AppArtifactsRouteImport } from './routes/_app.artifacts'
 import { Route as AppApprovalsRouteImport } from './routes/_app.approvals'
 import { Route as AppMissionsMissionIdRouteImport } from './routes/_app.missions.$missionId'
+import { Route as AppAutomationsJobIdRouteImport } from './routes/_app.automations.$jobId'
 import { Route as AppArtifactsArtifactIdRouteImport } from './routes/_app.artifacts.$artifactId'
 import { Route as AppApprovalsApprovalIdRouteImport } from './routes/_app.approvals.$approvalId'
 
@@ -27,9 +32,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTrustRoute = AppTrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMissionsRoute = AppMissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHealthRoute = AppHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAutomationsRoute = AppAutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
   getParentRoute: () => AppRoute,
 } as any)
 const AppArtifactsRoute = AppArtifactsRouteImport.update({
@@ -47,6 +72,11 @@ const AppMissionsMissionIdRoute = AppMissionsMissionIdRouteImport.update({
   path: '/$missionId',
   getParentRoute: () => AppMissionsRoute,
 } as any)
+const AppAutomationsJobIdRoute = AppAutomationsJobIdRouteImport.update({
+  id: '/$jobId',
+  path: '/$jobId',
+  getParentRoute: () => AppAutomationsRoute,
+} as any)
 const AppArtifactsArtifactIdRoute = AppArtifactsArtifactIdRouteImport.update({
   id: '/$artifactId',
   path: '/$artifactId',
@@ -62,18 +92,28 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/approvals': typeof AppApprovalsRouteWithChildren
   '/artifacts': typeof AppArtifactsRouteWithChildren
+  '/automations': typeof AppAutomationsRouteWithChildren
+  '/health': typeof AppHealthRoute
   '/missions': typeof AppMissionsRouteWithChildren
+  '/settings': typeof AppSettingsRoute
+  '/trust': typeof AppTrustRoute
   '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/automations/$jobId': typeof AppAutomationsJobIdRoute
   '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/approvals': typeof AppApprovalsRouteWithChildren
   '/artifacts': typeof AppArtifactsRouteWithChildren
+  '/automations': typeof AppAutomationsRouteWithChildren
+  '/health': typeof AppHealthRoute
   '/missions': typeof AppMissionsRouteWithChildren
+  '/settings': typeof AppSettingsRoute
+  '/trust': typeof AppTrustRoute
   '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/automations/$jobId': typeof AppAutomationsJobIdRoute
   '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesById {
@@ -82,9 +122,14 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/approvals': typeof AppApprovalsRouteWithChildren
   '/_app/artifacts': typeof AppArtifactsRouteWithChildren
+  '/_app/automations': typeof AppAutomationsRouteWithChildren
+  '/_app/health': typeof AppHealthRoute
   '/_app/missions': typeof AppMissionsRouteWithChildren
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/trust': typeof AppTrustRoute
   '/_app/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/_app/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
+  '/_app/automations/$jobId': typeof AppAutomationsJobIdRoute
   '/_app/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRouteTypes {
@@ -93,18 +138,28 @@ export interface FileRouteTypes {
     | '/'
     | '/approvals'
     | '/artifacts'
+    | '/automations'
+    | '/health'
     | '/missions'
+    | '/settings'
+    | '/trust'
     | '/approvals/$approvalId'
     | '/artifacts/$artifactId'
+    | '/automations/$jobId'
     | '/missions/$missionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/approvals'
     | '/artifacts'
+    | '/automations'
+    | '/health'
     | '/missions'
+    | '/settings'
+    | '/trust'
     | '/approvals/$approvalId'
     | '/artifacts/$artifactId'
+    | '/automations/$jobId'
     | '/missions/$missionId'
   id:
     | '__root__'
@@ -112,9 +167,14 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/approvals'
     | '/_app/artifacts'
+    | '/_app/automations'
+    | '/_app/health'
     | '/_app/missions'
+    | '/_app/settings'
+    | '/_app/trust'
     | '/_app/approvals/$approvalId'
     | '/_app/artifacts/$artifactId'
+    | '/_app/automations/$jobId'
     | '/_app/missions/$missionId'
   fileRoutesById: FileRoutesById
 }
@@ -139,11 +199,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/trust': {
+      id: '/_app/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof AppTrustRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/missions': {
       id: '/_app/missions'
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof AppMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/health': {
+      id: '/_app/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof AppHealthRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/automations': {
+      id: '/_app/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AppAutomationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/artifacts': {
@@ -166,6 +254,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/missions/$missionId'
       preLoaderRoute: typeof AppMissionsMissionIdRouteImport
       parentRoute: typeof AppMissionsRoute
+    }
+    '/_app/automations/$jobId': {
+      id: '/_app/automations/$jobId'
+      path: '/$jobId'
+      fullPath: '/automations/$jobId'
+      preLoaderRoute: typeof AppAutomationsJobIdRouteImport
+      parentRoute: typeof AppAutomationsRoute
     }
     '/_app/artifacts/$artifactId': {
       id: '/_app/artifacts/$artifactId'
@@ -208,6 +303,18 @@ const AppArtifactsRouteWithChildren = AppArtifactsRoute._addFileChildren(
   AppArtifactsRouteChildren,
 )
 
+interface AppAutomationsRouteChildren {
+  AppAutomationsJobIdRoute: typeof AppAutomationsJobIdRoute
+}
+
+const AppAutomationsRouteChildren: AppAutomationsRouteChildren = {
+  AppAutomationsJobIdRoute: AppAutomationsJobIdRoute,
+}
+
+const AppAutomationsRouteWithChildren = AppAutomationsRoute._addFileChildren(
+  AppAutomationsRouteChildren,
+)
+
 interface AppMissionsRouteChildren {
   AppMissionsMissionIdRoute: typeof AppMissionsMissionIdRoute
 }
@@ -223,13 +330,21 @@ const AppMissionsRouteWithChildren = AppMissionsRoute._addFileChildren(
 interface AppRouteChildren {
   AppApprovalsRoute: typeof AppApprovalsRouteWithChildren
   AppArtifactsRoute: typeof AppArtifactsRouteWithChildren
+  AppAutomationsRoute: typeof AppAutomationsRouteWithChildren
+  AppHealthRoute: typeof AppHealthRoute
   AppMissionsRoute: typeof AppMissionsRouteWithChildren
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTrustRoute: typeof AppTrustRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppApprovalsRoute: AppApprovalsRouteWithChildren,
   AppArtifactsRoute: AppArtifactsRouteWithChildren,
+  AppAutomationsRoute: AppAutomationsRouteWithChildren,
+  AppHealthRoute: AppHealthRoute,
   AppMissionsRoute: AppMissionsRouteWithChildren,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTrustRoute: AppTrustRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
