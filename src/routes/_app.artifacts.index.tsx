@@ -4,7 +4,7 @@ import { useAmc } from "@/mock/store";
 import { PageHeader } from "@/components/amc/PageHeader";
 import { ConfidenceBar, MonoId, RelativeTime, StatusChip } from "@/components/amc/primitives";
 
-export const Route = createFileRoute("/_app/artifacts")({
+export const Route = createFileRoute("/_app/artifacts/")({
   component: ArtifactsPage,
 });
 

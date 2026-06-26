@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/amc/PageHeader";
 import { SectionHeader, EmptyState } from "@/components/amc/primitives";
 import { Inbox } from "lucide-react";
 
-export const Route = createFileRoute("/_app/approvals")({
+export const Route = createFileRoute("/_app/approvals/")({
   component: ApprovalsPage,
 });
 

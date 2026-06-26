@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAmc } from "@/mock/store";
 
-export const Route = createFileRoute("/_app/chat")({
+export const Route = createFileRoute("/_app/chat/")({
   component: ChatIndex,
 });
 

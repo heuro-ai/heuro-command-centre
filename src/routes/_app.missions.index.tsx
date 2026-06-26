@@ -6,7 +6,7 @@ import { MissionCard } from "@/components/amc/MissionCard";
 import { PageHeader } from "@/components/amc/PageHeader";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_app/missions")({
+export const Route = createFileRoute("/_app/missions/")({
   component: MissionsPage,
 });
 

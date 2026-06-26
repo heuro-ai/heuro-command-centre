@@ -3,7 +3,7 @@ import { useAmc } from "@/mock/store";
 import { PageHeader } from "@/components/amc/PageHeader";
 import { MonoId, RelativeTime, Sparkline, StatusChip } from "@/components/amc/primitives";
 
-export const Route = createFileRoute("/_app/automations")({
+export const Route = createFileRoute("/_app/automations/")({
   component: AutomationsPage,
 });
 
