@@ -1,2 +1,3 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-export const Route = createFileRoute("/_app/approvals")({ component: () => <Outlet /> });
+function ApprovalsLayout() { return <Outlet />; }
+export const Route = createFileRoute("/_app/approvals")({ component: ApprovalsLayout });

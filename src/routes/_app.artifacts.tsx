@@ -1,2 +1,3 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-export const Route = createFileRoute("/_app/artifacts")({ component: () => <Outlet /> });
+function ArtifactsLayout() { return <Outlet />; }
+export const Route = createFileRoute("/_app/artifacts")({ component: ArtifactsLayout });
