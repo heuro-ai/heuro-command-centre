@@ -106,11 +106,13 @@ function ChatPage() {
                   </div>
                 )}
                 {m.card?.kind === "approval" && (() => {
-                  const a = approvals.find((x) => x.id === m.card!.approval_id);
+                  const card = m.card;
+                  const a = approvals.find((x) => x.id === card.approval_id);
                   return a ? <ApprovalCard approval={a} compact /> : null;
                 })()}
                 {m.card?.kind === "artifact" && (() => {
-                  const a = artifacts.find((x) => x.id === m.card!.artifact_id);
+                  const card = m.card;
+                  const a = artifacts.find((x) => x.id === card.artifact_id);
                   return a ? (
                     <Link
                       to="/artifacts/$artifactId"

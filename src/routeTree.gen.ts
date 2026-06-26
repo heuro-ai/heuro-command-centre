@@ -15,10 +15,12 @@ import { Route as AppTrustRouteImport } from './routes/_app.trust'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppMissionsRouteImport } from './routes/_app.missions'
 import { Route as AppHealthRouteImport } from './routes/_app.health'
+import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAutomationsRouteImport } from './routes/_app.automations'
 import { Route as AppArtifactsRouteImport } from './routes/_app.artifacts'
 import { Route as AppApprovalsRouteImport } from './routes/_app.approvals'
 import { Route as AppMissionsMissionIdRouteImport } from './routes/_app.missions.$missionId'
+import { Route as AppChatMissionIdRouteImport } from './routes/_app.chat.$missionId'
 import { Route as AppAutomationsJobIdRouteImport } from './routes/_app.automations.$jobId'
 import { Route as AppArtifactsArtifactIdRouteImport } from './routes/_app.artifacts.$artifactId'
 import { Route as AppApprovalsApprovalIdRouteImport } from './routes/_app.approvals.$approvalId'
@@ -52,6 +54,11 @@ const AppHealthRoute = AppHealthRouteImport.update({
   path: '/health',
   getParentRoute: () => AppRoute,
 } as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAutomationsRoute = AppAutomationsRouteImport.update({
   id: '/automations',
   path: '/automations',
@@ -71,6 +78,11 @@ const AppMissionsMissionIdRoute = AppMissionsMissionIdRouteImport.update({
   id: '/$missionId',
   path: '/$missionId',
   getParentRoute: () => AppMissionsRoute,
+} as any)
+const AppChatMissionIdRoute = AppChatMissionIdRouteImport.update({
+  id: '/$missionId',
+  path: '/$missionId',
+  getParentRoute: () => AppChatRoute,
 } as any)
 const AppAutomationsJobIdRoute = AppAutomationsJobIdRouteImport.update({
   id: '/$jobId',
@@ -93,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof AppApprovalsRouteWithChildren
   '/artifacts': typeof AppArtifactsRouteWithChildren
   '/automations': typeof AppAutomationsRouteWithChildren
+  '/chat': typeof AppChatRouteWithChildren
   '/health': typeof AppHealthRoute
   '/missions': typeof AppMissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
@@ -100,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
   '/automations/$jobId': typeof AppAutomationsJobIdRoute
+  '/chat/$missionId': typeof AppChatMissionIdRoute
   '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +121,7 @@ export interface FileRoutesByTo {
   '/approvals': typeof AppApprovalsRouteWithChildren
   '/artifacts': typeof AppArtifactsRouteWithChildren
   '/automations': typeof AppAutomationsRouteWithChildren
+  '/chat': typeof AppChatRouteWithChildren
   '/health': typeof AppHealthRoute
   '/missions': typeof AppMissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
@@ -114,6 +129,7 @@ export interface FileRoutesByTo {
   '/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
   '/automations/$jobId': typeof AppAutomationsJobIdRoute
+  '/chat/$missionId': typeof AppChatMissionIdRoute
   '/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRoutesById {
@@ -123,6 +139,7 @@ export interface FileRoutesById {
   '/_app/approvals': typeof AppApprovalsRouteWithChildren
   '/_app/artifacts': typeof AppArtifactsRouteWithChildren
   '/_app/automations': typeof AppAutomationsRouteWithChildren
+  '/_app/chat': typeof AppChatRouteWithChildren
   '/_app/health': typeof AppHealthRoute
   '/_app/missions': typeof AppMissionsRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
@@ -130,6 +147,7 @@ export interface FileRoutesById {
   '/_app/approvals/$approvalId': typeof AppApprovalsApprovalIdRoute
   '/_app/artifacts/$artifactId': typeof AppArtifactsArtifactIdRoute
   '/_app/automations/$jobId': typeof AppAutomationsJobIdRoute
+  '/_app/chat/$missionId': typeof AppChatMissionIdRoute
   '/_app/missions/$missionId': typeof AppMissionsMissionIdRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +157,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/artifacts'
     | '/automations'
+    | '/chat'
     | '/health'
     | '/missions'
     | '/settings'
@@ -146,6 +165,7 @@ export interface FileRouteTypes {
     | '/approvals/$approvalId'
     | '/artifacts/$artifactId'
     | '/automations/$jobId'
+    | '/chat/$missionId'
     | '/missions/$missionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -153,6 +173,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/artifacts'
     | '/automations'
+    | '/chat'
     | '/health'
     | '/missions'
     | '/settings'
@@ -160,6 +181,7 @@ export interface FileRouteTypes {
     | '/approvals/$approvalId'
     | '/artifacts/$artifactId'
     | '/automations/$jobId'
+    | '/chat/$missionId'
     | '/missions/$missionId'
   id:
     | '__root__'
@@ -168,6 +190,7 @@ export interface FileRouteTypes {
     | '/_app/approvals'
     | '/_app/artifacts'
     | '/_app/automations'
+    | '/_app/chat'
     | '/_app/health'
     | '/_app/missions'
     | '/_app/settings'
@@ -175,6 +198,7 @@ export interface FileRouteTypes {
     | '/_app/approvals/$approvalId'
     | '/_app/artifacts/$artifactId'
     | '/_app/automations/$jobId'
+    | '/_app/chat/$missionId'
     | '/_app/missions/$missionId'
   fileRoutesById: FileRoutesById
 }
@@ -227,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHealthRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/chat': {
+      id: '/_app/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/automations': {
       id: '/_app/automations'
       path: '/automations'
@@ -254,6 +285,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/missions/$missionId'
       preLoaderRoute: typeof AppMissionsMissionIdRouteImport
       parentRoute: typeof AppMissionsRoute
+    }
+    '/_app/chat/$missionId': {
+      id: '/_app/chat/$missionId'
+      path: '/$missionId'
+      fullPath: '/chat/$missionId'
+      preLoaderRoute: typeof AppChatMissionIdRouteImport
+      parentRoute: typeof AppChatRoute
     }
     '/_app/automations/$jobId': {
       id: '/_app/automations/$jobId'
@@ -315,6 +353,17 @@ const AppAutomationsRouteWithChildren = AppAutomationsRoute._addFileChildren(
   AppAutomationsRouteChildren,
 )
 
+interface AppChatRouteChildren {
+  AppChatMissionIdRoute: typeof AppChatMissionIdRoute
+}
+
+const AppChatRouteChildren: AppChatRouteChildren = {
+  AppChatMissionIdRoute: AppChatMissionIdRoute,
+}
+
+const AppChatRouteWithChildren =
+  AppChatRoute._addFileChildren(AppChatRouteChildren)
+
 interface AppMissionsRouteChildren {
   AppMissionsMissionIdRoute: typeof AppMissionsMissionIdRoute
 }
@@ -331,6 +380,7 @@ interface AppRouteChildren {
   AppApprovalsRoute: typeof AppApprovalsRouteWithChildren
   AppArtifactsRoute: typeof AppArtifactsRouteWithChildren
   AppAutomationsRoute: typeof AppAutomationsRouteWithChildren
+  AppChatRoute: typeof AppChatRouteWithChildren
   AppHealthRoute: typeof AppHealthRoute
   AppMissionsRoute: typeof AppMissionsRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
@@ -341,6 +391,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppApprovalsRoute: AppApprovalsRouteWithChildren,
   AppArtifactsRoute: AppArtifactsRouteWithChildren,
   AppAutomationsRoute: AppAutomationsRouteWithChildren,
+  AppChatRoute: AppChatRouteWithChildren,
   AppHealthRoute: AppHealthRoute,
   AppMissionsRoute: AppMissionsRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
