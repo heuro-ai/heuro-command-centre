@@ -13,7 +13,8 @@ const items: { to: string; icon: typeof Activity; label: string; badge?: boolean
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const pending = useAmc((s) => s.approvals.filter((a) => a.status === "pending").length);
+  const approvals = useAmc((s) => s.approvals);
+  const pending = approvals.filter((a) => a.status === "pending").length;
 
   return (
     <nav className="sticky bottom-0 z-30 flex border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">

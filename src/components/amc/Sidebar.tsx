@@ -25,7 +25,8 @@ const items: { to: string; icon: typeof Bot; label: string; badge?: boolean }[] 
 
 export function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const pending = useAmc((s) => s.approvals.filter((a) => a.status === "pending").length);
+  const approvals = useAmc((s) => s.approvals);
+  const pending = approvals.filter((a) => a.status === "pending").length;
 
   return (
     <aside className="hidden w-56 shrink-0 border-r border-border bg-sidebar lg:flex lg:flex-col">

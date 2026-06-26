@@ -5,8 +5,10 @@ import { StatusChip } from "./primitives";
 
 export function HealthBar() {
   const agent = useAmc((s) => s.agent);
-  const approvals = useAmc((s) => s.approvals.filter((a) => a.status === "pending").length);
-  const stalled = useAmc((s) => s.missions.filter((m) => m.status === "stalled").length);
+  const allApprovals = useAmc((s) => s.approvals);
+  const allMissions = useAmc((s) => s.missions);
+  const approvals = allApprovals.filter((a) => a.status === "pending").length;
+  const stalled = allMissions.filter((m) => m.status === "stalled").length;
   const alerts = approvals + stalled;
 
   return (
@@ -39,8 +41,10 @@ export function HealthBar() {
 
 export function DesktopHealthStrip() {
   const agent = useAmc((s) => s.agent);
-  const approvals = useAmc((s) => s.approvals.filter((a) => a.status === "pending").length);
-  const stalled = useAmc((s) => s.missions.filter((m) => m.status === "stalled").length);
+  const allApprovals = useAmc((s) => s.approvals);
+  const allMissions = useAmc((s) => s.missions);
+  const approvals = allApprovals.filter((a) => a.status === "pending").length;
+  const stalled = allMissions.filter((m) => m.status === "stalled").length;
   return (
     <div className="hidden h-12 items-center justify-between border-b border-border bg-background/80 px-5 backdrop-blur lg:flex">
       <div className="flex items-center gap-3">
