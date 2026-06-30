@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTrustRouteImport } from './routes/_app.trust'
@@ -31,6 +32,11 @@ import { Route as ApiPublicAgentIngestRouteImport } from './routes/api/public/ag
 const ConnectRoute = ConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -120,6 +126,7 @@ const ApiPublicAgentIngestRoute = ApiPublicAgentIngestRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/approvals': typeof AppApprovalsRoute
   '/artifacts': typeof AppArtifactsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/approvals': typeof AppApprovalsRoute
   '/artifacts': typeof AppArtifactsRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/_app/approvals': typeof AppApprovalsRoute
   '/_app/artifacts': typeof AppArtifactsRoute
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/connect'
     | '/approvals'
     | '/artifacts'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/connect'
     | '/approvals'
     | '/artifacts'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/auth'
     | '/connect'
     | '/_app/approvals'
     | '/_app/artifacts'
@@ -241,6 +253,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ConnectRoute: typeof ConnectRoute
   ApiPublicAgentIngestRoute: typeof ApiPublicAgentIngestRoute
   ApiPublicAgentPairRoute: typeof ApiPublicAgentPairRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/connect'
       fullPath: '/connect'
       preLoaderRoute: typeof ConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -414,6 +434,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
   ConnectRoute: ConnectRoute,
   ApiPublicAgentIngestRoute: ApiPublicAgentIngestRoute,
   ApiPublicAgentPairRoute: ApiPublicAgentPairRoute,

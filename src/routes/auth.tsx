@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
@@ -49,11 +48,7 @@ function AuthPage() {
   }
 
   async function onGoogle() {
-    setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) setError(result.error.message);
+    setError("Google sign-in: enable it in Cloud → Auth, then I'll wire it up.");
   }
 
   return (
