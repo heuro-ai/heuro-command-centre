@@ -25,6 +25,7 @@ import { Route as AppMissionMissionIdRouteImport } from './routes/_app.mission.$
 import { Route as AppAutomationJobIdRouteImport } from './routes/_app.automation.$jobId'
 import { Route as AppArtifactArtifactIdRouteImport } from './routes/_app.artifact.$artifactId'
 import { Route as AppApprovalApprovalIdRouteImport } from './routes/_app.approval.$approvalId'
+import { Route as ApiPublicAgentPairRouteImport } from './routes/api/public/agent/pair'
 
 const ConnectRoute = ConnectRouteImport.update({
   id: '/connect',
@@ -105,6 +106,11 @@ const AppApprovalApprovalIdRoute = AppApprovalApprovalIdRouteImport.update({
   path: '/approval/$approvalId',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicAgentPairRoute = ApiPublicAgentPairRouteImport.update({
+  id: '/api/public/agent/pair',
+  path: '/api/public/agent/pair',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/automation/$jobId': typeof AppAutomationJobIdRoute
   '/mission/$missionId': typeof AppMissionMissionIdRoute
   '/thread/$missionId': typeof AppThreadMissionIdRoute
+  '/api/public/agent/pair': typeof ApiPublicAgentPairRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/automation/$jobId': typeof AppAutomationJobIdRoute
   '/mission/$missionId': typeof AppMissionMissionIdRoute
   '/thread/$missionId': typeof AppThreadMissionIdRoute
+  '/api/public/agent/pair': typeof ApiPublicAgentPairRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_app/automation/$jobId': typeof AppAutomationJobIdRoute
   '/_app/mission/$missionId': typeof AppMissionMissionIdRoute
   '/_app/thread/$missionId': typeof AppThreadMissionIdRoute
+  '/api/public/agent/pair': typeof ApiPublicAgentPairRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/automation/$jobId'
     | '/mission/$missionId'
     | '/thread/$missionId'
+    | '/api/public/agent/pair'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/automation/$jobId'
     | '/mission/$missionId'
     | '/thread/$missionId'
+    | '/api/public/agent/pair'
   id:
     | '__root__'
     | '/'
@@ -212,12 +223,14 @@ export interface FileRouteTypes {
     | '/_app/automation/$jobId'
     | '/_app/mission/$missionId'
     | '/_app/thread/$missionId'
+    | '/api/public/agent/pair'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   ConnectRoute: typeof ConnectRoute
+  ApiPublicAgentPairRoute: typeof ApiPublicAgentPairRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -334,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppApprovalApprovalIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/agent/pair': {
+      id: '/api/public/agent/pair'
+      path: '/api/public/agent/pair'
+      fullPath: '/api/public/agent/pair'
+      preLoaderRoute: typeof ApiPublicAgentPairRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -375,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   ConnectRoute: ConnectRoute,
+  ApiPublicAgentPairRoute: ApiPublicAgentPairRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
