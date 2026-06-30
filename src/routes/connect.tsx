@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Check,
   ChevronDown,
+  Copy,
   Eye,
   Link2,
   Loader2,
   Lock,
+  Radio,
   ShieldCheck,
   Sparkles,
+  Terminal,
   X,
 } from "lucide-react";
 import { useAmc } from "@/mock/store";
@@ -107,6 +110,18 @@ function ConnectScreen() {
   const [permission, setPermission] = useState<PermissionMode>("control");
   const [connecting, setConnecting] = useState(false);
   const [showDataNotice, setShowDataNotice] = useState(false);
+  const [showManual, setShowManual] = useState(false);
+
+  // Session ID is the device-flow handshake token shown to the user and
+  // matched against the CLI callback. Stable per page load.
+  const sessionId = useMemo(
+    () =>
+      "amc_" +
+      Math.random().toString(36).slice(2, 6).toUpperCase() +
+      "-" +
+      Math.random().toString(36).slice(2, 6).toUpperCase(),
+    [],
+  );
 
   // Deep-link handling: ?token=… or ?link=…
   useEffect(() => {
@@ -158,6 +173,15 @@ function ConnectScreen() {
     navigate({ to: "/missions" });
   }
 
+  // Simulates the CLI hitting our deep-link callback with the session ID.
+  function simulateCliCallback() {
+    const result = parseConnectLink(
+      `hermes://connect?token=${sessionId}&name=Hermes&v=0.14.2&profile=founder-ops`,
+      "deeplink",
+    );
+    if (result.ok) setParsed(result.agent);
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -171,15 +195,26 @@ function ConnectScreen() {
 
       <div className="mx-auto max-w-2xl px-4 py-10 lg:py-16">
         {!parsed ? (
-          <PairCard
-            linkInput={linkInput}
-            codeInput={codeInput}
-            linkError={linkError}
-            codeError={codeError}
-            onLinkChange={onLinkChange}
-            onCodeChange={onCodeChange}
-            onDemo={enterDemo}
-          />
+          <>
+            <CliCard
+              sessionId={sessionId}
+              onSimulate={simulateCliCallback}
+              onDemo={enterDemo}
+            />
+            <ManualDisclosure
+              open={showManual}
+              onToggle={() => setShowManual((v) => !v)}
+            >
+              <PairCard
+                linkInput={linkInput}
+                codeInput={codeInput}
+                linkError={linkError}
+                codeError={codeError}
+                onLinkChange={onLinkChange}
+                onCodeChange={onCodeChange}
+              />
+            </ManualDisclosure>
+          </>
         ) : (
           <ConfirmCard
             agent={parsed}
@@ -201,6 +236,149 @@ function ConnectScreen() {
   );
 }
 
+function CliCard({
+  sessionId,
+  onSimulate,
+  onDemo,
+}: {
+  sessionId: string;
+  onSimulate: () => void;
+  onDemo: () => void;
+}) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const cmd = `agent-control connect --session ${sessionId}`;
+
+  function copy(label: string, value: string) {
+    navigator.clipboard?.writeText(value);
+    setCopied(label);
+    setTimeout(() => setCopied(null), 1400);
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-surface p-6 lg:p-8">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Connect Hermes in 30 seconds.</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            One command. Your agent stays local. We never see your code or keys.
+          </p>
+        </div>
+        <WaitingPill />
+      </div>
+
+      <ol className="mt-6 space-y-4">
+        <Step n={1} title="Install the connector">
+          <CodeRow
+            value="pip install agent-mission-control"
+            copied={copied === "install"}
+            onCopy={() => copy("install", "pip install agent-mission-control")}
+          />
+        </Step>
+
+        <Step n={2} title="Run from the machine hosting Hermes">
+          <CodeRow
+            value={cmd}
+            copied={copied === "cmd"}
+            onCopy={() => copy("cmd", cmd)}
+          />
+          <div className="mt-1.5 text-[11px] text-muted-foreground">
+            Opens your browser, hands off the session, exits. No ports, no firewall.
+          </div>
+        </Step>
+
+        <Step n={3} title="Approve the pairing here">
+          <div className="rounded-md border border-dashed border-border bg-background/40 px-3 py-2.5 text-xs text-muted-foreground">
+            This page will detect your agent automatically and show a confirm panel.
+          </div>
+        </Step>
+      </ol>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background/40 p-3">
+        <div className="flex items-center gap-2 text-xs">
+          <Radio className="h-3.5 w-3.5 animate-pulse text-accent-cyan" />
+          <span className="text-muted-foreground">Session</span>
+          <span className="font-mono text-foreground">{sessionId}</span>
+        </div>
+        <button
+          onClick={onSimulate}
+          className="rounded-md border border-accent-cyan/30 bg-accent-cyan/10 px-2.5 py-1 text-[11px] font-medium text-accent-cyan hover:bg-accent-cyan/15"
+          title="Demo: pretend the CLI just called back"
+        >
+          Simulate CLI callback →
+        </button>
+      </div>
+
+      <div className="mt-5 flex items-center gap-1.5 text-xs">
+        <Sparkles className="h-3.5 w-3.5 text-accent-cyan" />
+        <span className="text-muted-foreground">Just exploring?</span>
+        <button onClick={onDemo} className="font-medium text-accent-cyan hover:underline">
+          Enter Demo Mode →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WaitingPill() {
+  return (
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-2 py-0.5 text-[11px] text-muted-foreground">
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-cyan opacity-75" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-cyan" />
+      </span>
+      Waiting for agent
+    </div>
+  );
+}
+
+function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <li className="flex gap-3">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[11px] font-mono text-muted-foreground">
+        {n}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium text-foreground">{title}</div>
+        <div className="mt-1.5">{children}</div>
+      </div>
+    </li>
+  );
+}
+
+function CodeRow({
+  value, copied, onCopy,
+}: { value: string; copied: boolean; onCopy: () => void }) {
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
+      <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <code className="flex-1 truncate font-mono text-xs text-foreground">{value}</code>
+      <button
+        onClick={onCopy}
+        className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-surface hover:text-foreground"
+      >
+        {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
+      </button>
+    </div>
+  );
+}
+
+function ManualDisclosure({
+  open, onToggle, children,
+}: { open: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <div className="mt-4">
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-1.5 rounded-md border border-border bg-surface/50 px-3 py-2 text-xs text-muted-foreground hover:bg-surface hover:text-foreground"
+      >
+        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
+        Paste a link or code instead
+      </button>
+      {open && <div className="mt-3">{children}</div>}
+    </div>
+  );
+}
+
 function PairCard(props: {
   linkInput: string;
   codeInput: string;
@@ -208,21 +386,14 @@ function PairCard(props: {
   codeError: string | null;
   onLinkChange: (v: string) => void;
   onCodeChange: (v: string) => void;
-  onDemo: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-6 lg:p-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Connect your Hermes agent.</h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Paste a connect link from your Hermes dashboard. That's it.
-      </p>
-
-      <div className="mt-6">
+    <div className="rounded-xl border border-border bg-surface p-5">
+      <div>
         <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
           <Link2 className="h-3 w-3" /> Connect link
         </label>
         <input
-          autoFocus
           value={props.linkInput}
           onChange={(e) => props.onLinkChange(e.target.value)}
           placeholder="hermes://connect?token=…"
@@ -236,9 +407,6 @@ function PairCard(props: {
         {props.linkError && (
           <div className="mt-1.5 text-xs text-status-error">{props.linkError}</div>
         )}
-        <div className="mt-1.5 text-xs text-muted-foreground">
-          Auto-detects on paste. Also accepts <span className="font-mono">agentmissioncontrol.dev/pair/…</span>
-        </div>
       </div>
 
       <Divider label="or" />
@@ -262,25 +430,6 @@ function PairCard(props: {
         {props.codeError && (
           <div className="mt-1.5 text-xs text-status-error">{props.codeError}</div>
         )}
-      </div>
-
-      <div className="mt-7 rounded-lg border border-dashed border-border bg-background/40 p-3.5 text-xs text-muted-foreground">
-        <div className="font-medium text-foreground">Open from Hermes</div>
-        <div className="mt-0.5">
-          Click <span className="text-foreground">Open in Mission Control</span> from your Hermes dashboard
-          and this page fills in automatically.
-        </div>
-      </div>
-
-      <div className="mt-5 flex items-center gap-1.5 text-xs">
-        <Sparkles className="h-3.5 w-3.5 text-accent-cyan" />
-        <span className="text-muted-foreground">Just exploring?</span>
-        <button
-          onClick={props.onDemo}
-          className="font-medium text-accent-cyan hover:underline"
-        >
-          Enter Demo Mode →
-        </button>
       </div>
     </div>
   );
