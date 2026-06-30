@@ -14,7 +14,148 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_events: {
+        Row: {
+          agent_id: string
+          event_id: string
+          event_type: string
+          id: number
+          mission_id: string | null
+          occurred_at: string
+          owner_id: string
+          payload: Json
+          received_at: string
+        }
+        Insert: {
+          agent_id: string
+          event_id: string
+          event_type: string
+          id?: number
+          mission_id?: string | null
+          occurred_at?: string
+          owner_id: string
+          payload?: Json
+          received_at?: string
+        }
+        Update: {
+          agent_id?: string
+          event_id?: string
+          event_type?: string
+          id?: number
+          mission_id?: string | null
+          occurred_at?: string
+          owner_id?: string
+          payload?: Json
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agents: {
+        Row: {
+          created_at: string
+          endpoint: string | null
+          fingerprint: string
+          id: string
+          last_seen_at: string | null
+          name: string
+          owner_id: string
+          permission: Database["public"]["Enums"]["permission_mode"]
+          profile: string | null
+          secret_hash: string
+          status: Database["public"]["Enums"]["agent_status"]
+          version: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint?: string | null
+          fingerprint: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          owner_id: string
+          permission?: Database["public"]["Enums"]["permission_mode"]
+          profile?: string | null
+          secret_hash: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          version?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string | null
+          fingerprint?: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          owner_id?: string
+          permission?: Database["public"]["Enums"]["permission_mode"]
+          profile?: string | null
+          secret_hash?: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          version?: string | null
+        }
+        Relationships: []
+      }
+      pairing_tokens: {
+        Row: {
+          claimed_agent_id: string | null
+          claimed_at: string | null
+          created_at: string
+          expires_at: string
+          owner_id: string
+          token: string
+        }
+        Insert: {
+          claimed_agent_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          expires_at: string
+          owner_id: string
+          token: string
+        }
+        Update: {
+          claimed_agent_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          owner_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pairing_tokens_claimed_agent_id_fkey"
+            columns: ["claimed_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +164,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      agent_status: "online" | "degraded" | "offline"
+      permission_mode: "monitor" | "control" | "full"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +292,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agent_status: ["online", "degraded", "offline"],
+      permission_mode: ["monitor", "control", "full"],
+    },
   },
 } as const
