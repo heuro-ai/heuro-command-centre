@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import type { Json } from "@/integrations/supabase/types";
 
 // Receives events from a bonded Hermes agent. Authentication is HMAC-SHA256
 // over the raw request body using the per-agent secret. The server stores
@@ -96,7 +97,7 @@ export const Route = createFileRoute("/api/public/agent/ingest")({
           event_id: e.event_id,
           event_type: e.event_type,
           mission_id: e.mission_id ?? null,
-          payload: e.payload,
+          payload: e.payload as unknown as Json,
           occurred_at: e.occurred_at ?? new Date().toISOString(),
         }));
 
