@@ -19,6 +19,7 @@ function AppShell() {
   useEffect(() => { setMounted(true); }, []);
 
   const connected = useAmc((s) => s.connected);
+  const mode = useAmc((s) => s.mode);
 
   useEffect(() => {
     let alive = true;
@@ -39,16 +40,16 @@ function AppShell() {
   useEffect(() => {
     if (!mounted || !authChecked) return;
     // Demo mode bypasses auth (lets people poke around without an account).
-    if (connected === "demo") return;
+    if (mode === "demo") return;
     if (!authed) {
       navigate({ to: "/auth", replace: true });
       return;
     }
     if (!connected) navigate({ to: "/connect", replace: true });
-  }, [connected, navigate, mounted, authChecked, authed]);
+  }, [connected, mode, navigate, mounted, authChecked, authed]);
 
   if (!mounted || !authChecked) return null;
-  if (!authed && connected !== "demo") return null;
+  if (!authed && mode !== "demo") return null;
   if (!connected) return null;
 
   return (
