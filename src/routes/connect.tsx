@@ -113,15 +113,17 @@ function ConnectScreen() {
   const [showManual, setShowManual] = useState(false);
 
   // Session ID is the device-flow handshake token shown to the user and
-  // matched against the CLI callback. Stable per page load.
-  const sessionId = useMemo(
-    () =>
+  // matched against the CLI callback. Generated client-side after mount to
+  // avoid SSR/CSR hydration mismatch.
+  const [sessionId, setSessionId] = useState<string>("amc_••••-••••");
+  useEffect(() => {
+    setSessionId(
       "amc_" +
-      Math.random().toString(36).slice(2, 6).toUpperCase() +
-      "-" +
-      Math.random().toString(36).slice(2, 6).toUpperCase(),
-    [],
-  );
+        Math.random().toString(36).slice(2, 6).toUpperCase() +
+        "-" +
+        Math.random().toString(36).slice(2, 6).toUpperCase(),
+    );
+  }, []);
 
   // Deep-link handling: ?token=… or ?link=…
   useEffect(() => {
