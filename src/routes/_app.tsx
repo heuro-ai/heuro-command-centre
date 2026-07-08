@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useAmc } from "@/mock/store";
-import { supabase } from "@/integrations/supabase/client";
 // connector intentionally disabled in MVP demo build
 import { Sidebar } from "@/components/amc/Sidebar";
 import { BottomNav } from "@/components/amc/BottomNav";
