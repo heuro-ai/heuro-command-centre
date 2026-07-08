@@ -10,12 +10,10 @@ import {
   Eye,
   Loader2,
   Lock,
-  LogOut,
   RefreshCw,
   ShieldCheck,
   Terminal,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAmc } from "@/mock/store";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,23 +48,9 @@ function ConnectScreen() {
   const issueToken = useServerFn(createPairingToken);
   const pollStatus = useServerFn(checkPairingStatus);
 
-  const [authed, setAuthed] = useState<boolean | null>(null);
   const [state, setState] = useState<PairState>({ kind: "idle" });
   const [showManual, setShowManual] = useState(false);
   const pollRef = useRef<number | null>(null);
-
-  // Gate: require auth.
-  useEffect(() => {
-    let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!alive) return;
-      if (!data.session) navigate({ to: "/auth", replace: true });
-      else setAuthed(true);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [navigate]);
 
   async function issue() {
     setState({ kind: "issuing" });
@@ -110,21 +94,9 @@ function ConnectScreen() {
     navigate({ to: "/missions" });
   }
 
-  function signOut() {
-    supabase.auth.signOut().then(() => navigate({ to: "/auth", replace: true }));
-  }
-
   function enterDemo() {
     resetDemo();
     navigate({ to: "/missions" });
-  }
-
-  if (authed === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
   }
 
   return (
@@ -137,12 +109,6 @@ function ConnectScreen() {
             </div>
             <div className="text-sm font-semibold">Agent Mission Control</div>
           </div>
-          <button
-            onClick={signOut}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-3 w-3" /> Sign out
-          </button>
         </div>
       </header>
 
