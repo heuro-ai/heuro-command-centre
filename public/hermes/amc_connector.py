@@ -402,6 +402,11 @@ def register(hermes) -> None:  # noqa: ANN001 — Hermes-specific type
         mid = payload.pop("mission_id", None)
         conn.publish(event_type, payload, mission_id=mid)
 
+    def _make_handler(name: str):
+        def _handler(**p):
+            _forward(name, **p)
+        return _handler
+
     for name in (
         "mission.started", "mission.step", "mission.completed", "mission.failed",
         "approval.requested", "approval.resolved",
@@ -409,7 +414,7 @@ def register(hermes) -> None:  # noqa: ANN001 — Hermes-specific type
         "automation.run", "automation.failed",
     ):
         try:
-            pub.subscribe(name, lambda **p, _n=name: _forward(_n, **p))
+            pub.subscribe(name, _make_handler(name))
         except Exception as exc:
             print(f"[amc] couldn't subscribe to {name}: {exc}", file=sys.stderr)
 
