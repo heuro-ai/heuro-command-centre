@@ -7,20 +7,28 @@ On first run it will print a URL and prompt you to paste an AMC pairing
 token. After that, it stores the per-agent secret in ~/.hermes/amc.json
 and pushes events to AMC over plain HTTPS, signed with HMAC-SHA256.
 
+Delivery model
+--------------
+- **At-least-once**: every published event is assigned a monotonic
+  per-agent sequence number (`seq`) and appended to a durable spool at
+  ~/.hermes/amc_spool.jsonl BEFORE we try to ship it. If the process
+  crashes or the network flakes, on next start we resume from the spool.
+- **Ack watermark**: the server returns `last_seq` after every successful
+  batch. We only trim the spool up to that point, so anything the server
+  hasn't confirmed is re-shipped on the next attempt.
+- **Server dedupe**: batches are deduped by (agent_id, seq). Re-shipping
+  the same seq is a no-op on the server side, so retries are safe.
+- **Reconnect**: on any network / 5xx / auth-transient error we back off
+  exponentially (1s → 2s → 4s → … capped at 60s) and keep the spool
+  intact. On 401 (bad_signature / unknown_agent) we halt and require
+  re-pairing rather than losing events silently.
+
 Security model
 --------------
-- Pairing token: one-time, 10-minute, single-use. Issued from /connect
-  while you're signed in to AMC.
-- Agent secret: generated server-side at pair time, shown ONCE in the
-  pair response, hashed at rest with SHA-256. The agent stores the raw
-  secret locally in ~/.hermes/amc.json (chmod 600).
-- Every event batch is signed:
-      sig = HMAC-SHA256(sha256(secret), raw_body_bytes).hex()
-  The server re-derives the same key from the stored hash and verifies.
-  This means the raw secret is never reconstructable from the database.
-- No inbound ports. The connector only makes outbound HTTPS calls.
-- No code, env vars, or files are read. Only event metadata you publish
-  via Hermes' event_publisher is forwarded.
+- Pairing token: one-time, 10-minute, single-use.
+- Agent secret shown once at pair time, hashed (SHA-256) at rest.
+- Every batch signed HMAC-SHA256(sha256(secret), body).
+- No inbound ports. Outbound HTTPS only. Only event metadata is sent.
 
 Requirements
 ------------
@@ -47,8 +55,12 @@ import requests
 
 AMC_BASE_URL = os.environ.get("AMC_BASE_URL", "https://heuro-command-centre.lovable.app")
 CONFIG_PATH = Path.home() / ".hermes" / "amc.json"
+SPOOL_PATH = Path.home() / ".hermes" / "amc_spool.jsonl"
 BATCH_INTERVAL = 1.5  # seconds
 BATCH_MAX = 50
+BACKOFF_MIN = 1.0
+BACKOFF_MAX = 60.0
+SPOOL_SOFT_CAP = 50_000  # events; older ones stay on disk but warn
 
 
 def _fingerprint() -> str:
@@ -102,6 +114,8 @@ def _pair_interactively() -> Dict[str, Any]:
         "ingest_url": data["ingestUrl"],
         "paired_at": time.time(),
         "fingerprint": body["fingerprint"],
+        "last_seq": 0,     # highest seq the server has ACKed
+        "next_seq": 1,     # next seq to assign to a new event
     }
     _save_config(cfg)
     print(f"✓ Paired. Agent ID {cfg['agent_id']}")
@@ -117,57 +131,183 @@ def _sign(secret: str, raw_body: bytes) -> str:
     return hmac.new(_signing_key(secret), raw_body, hashlib.sha256).hexdigest()
 
 
+class Spool:
+    """Append-only JSONL of unacked events. Persists across restarts.
+
+    Rewrites on trim. A single lock covers both the file and the in-memory
+    mirror so a shipping thread and the publish thread can't race.
+    """
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.lock = threading.Lock()
+        self.events: list[Dict[str, Any]] = []
+        self._load()
+
+    def _load(self) -> None:
+        if not self.path.exists():
+            return
+        try:
+            with self.path.open() as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        self.events.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+        except OSError as exc:
+            print(f"[amc] spool read failed: {exc}", file=sys.stderr)
+
+    def append(self, event: Dict[str, Any]) -> None:
+        with self.lock:
+            self.events.append(event)
+            try:
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                with self.path.open("a") as f:
+                    f.write(json.dumps(event, separators=(",", ":")) + "\n")
+                    f.flush()
+                    os.fsync(f.fileno())
+            except OSError as exc:
+                print(f"[amc] spool write failed: {exc}", file=sys.stderr)
+            if len(self.events) == SPOOL_SOFT_CAP:
+                print(
+                    f"[amc] spool has {SPOOL_SOFT_CAP} unacked events — "
+                    "AMC may be unreachable",
+                    file=sys.stderr,
+                )
+
+    def peek(self, n: int) -> list[Dict[str, Any]]:
+        with self.lock:
+            return list(self.events[:n])
+
+    def trim_up_to(self, last_seq: int) -> int:
+        """Drop everything with seq <= last_seq. Returns count removed."""
+        with self.lock:
+            keep = [e for e in self.events if e["seq"] > last_seq]
+            removed = len(self.events) - len(keep)
+            if removed == 0:
+                return 0
+            self.events = keep
+            self._rewrite_locked()
+            return removed
+
+    def _rewrite_locked(self) -> None:
+        try:
+            tmp = self.path.with_suffix(".tmp")
+            with tmp.open("w") as f:
+                for e in self.events:
+                    f.write(json.dumps(e, separators=(",", ":")) + "\n")
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp, self.path)
+        except OSError as exc:
+            print(f"[amc] spool rewrite failed: {exc}", file=sys.stderr)
+
+    def __len__(self) -> int:
+        with self.lock:
+            return len(self.events)
+
+    def max_seq(self) -> int:
+        with self.lock:
+            return max((e["seq"] for e in self.events), default=0)
+
+
 class AmcConnector:
-    """Buffers events and ships them to AMC in batches."""
+    """Durable at-least-once shipper.
+
+    Flow:
+      publish(evt) → assign seq → append to spool → notify shipper
+      shipper loop → peek up to BATCH_MAX → POST /ingest
+                   → on 2xx: trim spool up to server-ack `last_seq`
+                   → on transient: exponential backoff, keep spool
+                   → on auth error: halt (require re-pair)
+    """
 
     def __init__(self, cfg: Dict[str, Any]):
         self.cfg = cfg
-        self.queue: Queue[Dict[str, Any]] = Queue()
+        self.spool = Spool(SPOOL_PATH)
         self.stop = threading.Event()
+        self.wake = threading.Event()
+        self.seq_lock = threading.Lock()
+        # Resume seq state from the durable spool AND the persisted config,
+        # taking the max — so a partial ack survives a crash without
+        # reissuing a seq we already spooled.
+        self.next_seq = max(int(cfg.get("next_seq", 1)), self.spool.max_seq() + 1)
+        self.last_seq_ack = int(cfg.get("last_seq", 0))
+        self.halted = False
         self.thread = threading.Thread(target=self._run, name="amc-shipper", daemon=True)
 
     def start(self) -> None:
         self.thread.start()
 
     def publish(self, event_type: str, payload: Dict[str, Any], mission_id: Optional[str] = None) -> None:
-        self.queue.put({
+        if self.halted:
+            return
+        with self.seq_lock:
+            seq = self.next_seq
+            self.next_seq += 1
+        event = {
+            "seq": seq,
             "event_id": str(uuid.uuid4()),
             "event_type": event_type,
             "mission_id": mission_id,
             "occurred_at": _iso_now(),
             "payload": payload,
-        })
-
-    def _drain(self) -> list:
-        batch: list = []
-        deadline = time.time() + BATCH_INTERVAL
-        while len(batch) < BATCH_MAX and time.time() < deadline:
-            try:
-                batch.append(self.queue.get(timeout=max(0.05, deadline - time.time())))
-            except Empty:
-                break
-        return batch
+        }
+        self.spool.append(event)
+        self.wake.set()
 
     def _run(self) -> None:
-        # Heartbeat so AMC marks us online even when idle.
         last_beat = 0.0
+        backoff = BACKOFF_MIN
         while not self.stop.is_set():
-            batch = self._drain()
+            if self.halted:
+                time.sleep(1.0)
+                continue
+
+            # Ensure a heartbeat is spooled at least every 30s.
             now = time.time()
             if now - last_beat > 30:
-                batch.append({
-                    "event_id": str(uuid.uuid4()),
-                    "event_type": "agent.heartbeat",
-                    "mission_id": None,
-                    "occurred_at": _iso_now(),
-                    "payload": {"uptime_s": int(now - self.cfg.get("paired_at", now))},
-                })
+                self.publish(
+                    "agent.heartbeat",
+                    {"uptime_s": int(now - self.cfg.get("paired_at", now)),
+                     "unacked": len(self.spool)},
+                )
                 last_beat = now
-            if not batch:
-                continue
-            self._ship(batch)
 
-    def _ship(self, batch: list, attempt: int = 0) -> None:
+            batch = self.spool.peek(BATCH_MAX)
+            if not batch:
+                # Nothing to ship — sleep until publish() wakes us or heartbeat is due.
+                self.wake.wait(timeout=BATCH_INTERVAL)
+                self.wake.clear()
+                continue
+
+            outcome = self._ship(batch)
+            if outcome == "ok":
+                backoff = BACKOFF_MIN
+                # Small pause to allow batches to fill; drain quickly if backlog remains.
+                if len(self.spool) == 0:
+                    self.wake.wait(timeout=BATCH_INTERVAL)
+                    self.wake.clear()
+            elif outcome == "halt":
+                self.halted = True
+                print(
+                    "[amc] halted — agent needs to be re-paired. "
+                    f"{len(self.spool)} events remain in {SPOOL_PATH}",
+                    file=sys.stderr,
+                )
+            else:  # "retry"
+                jitter = 0.1 * backoff * (2 * (os.urandom(1)[0] / 255.0) - 1)
+                sleep_for = min(BACKOFF_MAX, backoff + jitter)
+                print(f"[amc] transient error, retrying in {sleep_for:.1f}s "
+                      f"({len(self.spool)} unacked)", file=sys.stderr)
+                self.stop.wait(timeout=sleep_for)
+                backoff = min(BACKOFF_MAX, backoff * 2)
+
+    def _ship(self, batch: list) -> str:
+        """Returns 'ok', 'retry', or 'halt'."""
         raw = json.dumps(batch, separators=(",", ":")).encode()
         sig = _sign(self.cfg["agent_secret"], raw)
         try:
@@ -179,16 +319,54 @@ class AmcConnector:
                     "X-Agent-Id": self.cfg["agent_id"],
                     "X-Agent-Signature": sig,
                 },
-                timeout=10,
+                timeout=15,
             )
-            if resp.status_code >= 400:
-                print(f"[amc] ingest {resp.status_code}: {resp.text[:200]}", file=sys.stderr)
         except requests.RequestException as exc:
-            if attempt < 3:
-                time.sleep(2 ** attempt)
-                self._ship(batch, attempt + 1)
-            else:
-                print(f"[amc] dropped batch of {len(batch)}: {exc}", file=sys.stderr)
+            print(f"[amc] network error: {exc}", file=sys.stderr)
+            return "retry"
+
+        if 200 <= resp.status_code < 300:
+            try:
+                body = resp.json()
+                # Trust the server's watermark — it may be higher than what
+                # we just sent (already-acked replay) or equal.
+                server_seq = int(body.get("last_seq", 0))
+            except (ValueError, TypeError):
+                server_seq = batch[-1]["seq"]
+            # Never rewind the watermark.
+            server_seq = max(server_seq, self.last_seq_ack)
+            removed = self.spool.trim_up_to(server_seq)
+            self.last_seq_ack = server_seq
+            self._persist_progress()
+            if removed:
+                # keeps logs quiet in the steady state
+                pass
+            return "ok"
+
+        if resp.status_code in (401, 403):
+            # Signature invalid or agent unknown — no amount of retrying fixes this.
+            print(f"[amc] auth error {resp.status_code}: {resp.text[:200]}", file=sys.stderr)
+            return "halt"
+
+        if resp.status_code == 413:
+            # Batch too large — this shouldn't happen with BATCH_MAX=50, but if
+            # a single event is pathological, drop it so we don't wedge forever.
+            print(f"[amc] payload too large; dropping seq {batch[0]['seq']}", file=sys.stderr)
+            self.spool.trim_up_to(batch[0]["seq"])
+            return "ok"
+
+        # 4xx (non-auth) and 5xx → transient
+        print(f"[amc] ingest {resp.status_code}: {resp.text[:200]}", file=sys.stderr)
+        return "retry"
+
+    def _persist_progress(self) -> None:
+        """Snapshot seq state so a crashed process resumes cleanly."""
+        self.cfg["last_seq"] = self.last_seq_ack
+        self.cfg["next_seq"] = self.next_seq
+        try:
+            _save_config(self.cfg)
+        except OSError as exc:
+            print(f"[amc] config save failed: {exc}", file=sys.stderr)
 
 
 def _iso_now() -> str:
