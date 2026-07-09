@@ -48,7 +48,6 @@ import threading
 import time
 import uuid
 from pathlib import Path
-from queue import Queue, Empty
 from typing import Any, Dict, Optional
 
 import requests
