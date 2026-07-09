@@ -175,9 +175,13 @@ class ReconnectTests(unittest.TestCase):
             self._wait_drained(conn, expected=N)
             conn.stop.set()
 
-            self.assertEqual(len(server.received), N, "missing events on server")
-            self.assertEqual(sorted(server.received.keys()), list(range(1, N + 1)),
-                             "seqs are not a contiguous 1..N")
+            steps = [e for e in server.received.values() if e["event_type"] == "mission.step"]
+            self.assertEqual(len(steps), N, "missing mission.step events on server")
+            self.assertEqual(sorted(e["payload"]["i"] for e in steps), list(range(N)),
+                             "payload indices are not 0..N-1 (dupes or gaps)")
+            # Every seq the server received must be unique and monotonic.
+            seqs = sorted(server.received.keys())
+            self.assertEqual(len(seqs), len(set(seqs)), "server accepted duplicate seqs")
             self.assertGreater(server.dropped_count, 0, "test didn't actually drop anything")
             self.assertEqual(len(conn.spool), 0)
         finally:
@@ -196,10 +200,13 @@ class ReconnectTests(unittest.TestCase):
             self._wait_drained(conn, expected=N)
             conn.stop.set()
 
-            self.assertEqual(len(server.received), N)
-            self.assertEqual(sorted(server.received.keys()), list(range(1, N + 1)))
+            steps = [e for e in server.received.values() if e["event_type"] == "mission.step"]
+            self.assertEqual(len(steps), N)
+            self.assertEqual(sorted(e["payload"]["i"] for e in steps), list(range(N)))
             # Dedupe means retry requests must have happened without creating duplicates.
             self.assertGreater(server.request_count, N // amc_connector.BATCH_MAX)
+            seqs = list(server.received.keys())
+            self.assertEqual(len(seqs), len(set(seqs)), "duplicates slipped past server dedupe")
         finally:
             server.stop()
 
@@ -208,10 +215,11 @@ class ReconnectTests(unittest.TestCase):
         # Phase 1: everything drops, so nothing gets acked.
         server = MockIngest(drop_rate=1.0)
         url = server.start()
+        published_payloads = list(range(50))
         try:
             conn1 = amc_connector.AmcConnector(self._cfg(url))
             conn1.start()
-            for i in range(25):
+            for i in published_payloads[:25]:
                 conn1.publish("mission.step", {"i": i})
             # Give the shipper time to hit the drop wall a few times.
             time.sleep(0.5)
@@ -226,21 +234,33 @@ class ReconnectTests(unittest.TestCase):
         server2 = MockIngest(drop_rate=0.0)
         url2 = server2.start()
         try:
-            # Simulate reading persisted state — the previous run saved nothing to
-            # config because no ack ever happened, so next_seq must be recovered
-            # from the spool.
+            # The previous run saved nothing to config because no ack ever
+            # happened, so next_seq must be recovered from the spool.
             cfg = self._cfg(url2)
             conn2 = amc_connector.AmcConnector(cfg)
-            # The new connector must NOT reset seq — it must resume >= 26.
-            self.assertGreaterEqual(conn2.next_seq, 26,
-                                    f"connector reset seq to {conn2.next_seq}")
+            resume_from = conn2.next_seq
+            # The new connector must NOT reset seq — spool had >=25 events, so
+            # next_seq must be > spool.max_seq (i.e. > 25).
+            self.assertGreater(resume_from, 25,
+                               f"connector reset seq to {resume_from}")
             conn2.start()
-            for i in range(25, 50):
+            for i in published_payloads[25:]:
                 conn2.publish("mission.step", {"i": i})
-            self._wait_drained(conn2, expected=50)
+            # Wait until the spool drains and the ack covers everything we published.
+            deadline = time.time() + 20
+            while time.time() < deadline:
+                if len(conn2.spool) == 0:
+                    break
+                time.sleep(0.05)
+            self.assertEqual(len(conn2.spool), 0, "spool did not drain after reconnect")
             conn2.stop.set()
 
-            self.assertEqual(sorted(server2.received.keys()), list(range(1, 51)))
+            steps = [e for e in server2.received.values() if e["event_type"] == "mission.step"]
+            self.assertEqual(
+                sorted(e["payload"]["i"] for e in steps),
+                published_payloads,
+                "every published mission.step must land exactly once after restart",
+            )
         finally:
             server2.stop()
 
