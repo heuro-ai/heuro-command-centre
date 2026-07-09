@@ -29,6 +29,7 @@ const EventSchema = z.object({
   mission_id: z.string().max(120).optional().nullable(),
   occurred_at: z.string().datetime().optional(),
   payload: z.record(z.unknown()).default({}),
+  seq: z.number().int().positive(),
 });
 const BatchSchema = z.array(EventSchema).min(1).max(100);
 
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/api/public/agent/ingest")({
 
         const { data: agent, error: agentErr } = await supabaseAdmin
           .from("agents")
-          .select("id, owner_id, secret_hash")
+          .select("id, owner_id, secret_hash, last_seq")
           .eq("id", agentId)
           .maybeSingle();
         if (agentErr) return json(500, { error: "db_error" });
@@ -91,7 +92,19 @@ export const Route = createFileRoute("/api/public/agent/ingest")({
         const batch = BatchSchema.safeParse(parsedBody);
         if (!batch.success) return json(400, { error: "invalid_batch", details: batch.error.flatten() });
 
-        const rows = batch.data.map((e) => ({
+        // Sort by seq and drop anything at/below the watermark — that's the
+        // at-least-once contract: the agent may re-ship anything not yet
+        // acknowledged; the server silently ignores what it already has.
+        const watermark = Number(agent.last_seq ?? 0);
+        const fresh = batch.data
+          .filter((e) => e.seq > watermark)
+          .sort((a, b) => a.seq - b.seq);
+
+        if (fresh.length === 0) {
+          return json(200, { ok: true, accepted: 0, last_seq: watermark });
+        }
+
+        const rows = fresh.map((e) => ({
           agent_id: agent.id,
           owner_id: agent.owner_id,
           event_id: e.event_id,
@@ -99,19 +112,26 @@ export const Route = createFileRoute("/api/public/agent/ingest")({
           mission_id: e.mission_id ?? null,
           payload: e.payload as unknown as Json,
           occurred_at: e.occurred_at ?? new Date().toISOString(),
+          seq: e.seq,
         }));
 
         const { error: insErr } = await supabaseAdmin
           .from("agent_events")
-          .upsert(rows, { onConflict: "agent_id,event_id" });
+          .upsert(rows, { onConflict: "agent_id,seq", ignoreDuplicates: true });
         if (insErr) return json(500, { error: "insert_failed", detail: insErr.message });
 
+        const newWatermark = rows[rows.length - 1].seq;
         await supabaseAdmin
           .from("agents")
-          .update({ status: "online", last_seen_at: new Date().toISOString() })
-          .eq("id", agent.id);
+          .update({
+            status: "online",
+            last_seen_at: new Date().toISOString(),
+            last_seq: newWatermark,
+          })
+          .eq("id", agent.id)
+          .lt("last_seq", newWatermark);
 
-        return json(200, { ok: true, accepted: rows.length });
+        return json(200, { ok: true, accepted: rows.length, last_seq: newWatermark });
       },
     },
   },
