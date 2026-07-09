@@ -25,6 +25,7 @@ export type Database = {
           owner_id: string | null
           payload: Json
           received_at: string
+          seq: number
         }
         Insert: {
           agent_id: string
@@ -36,6 +37,7 @@ export type Database = {
           owner_id?: string | null
           payload?: Json
           received_at?: string
+          seq: number
         }
         Update: {
           agent_id?: string
@@ -47,6 +49,7 @@ export type Database = {
           owner_id?: string | null
           payload?: Json
           received_at?: string
+          seq?: number
         }
         Relationships: [
           {
@@ -65,6 +68,7 @@ export type Database = {
           fingerprint: string
           id: string
           last_seen_at: string | null
+          last_seq: number
           name: string
           owner_id: string | null
           permission: Database["public"]["Enums"]["permission_mode"]
@@ -79,6 +83,7 @@ export type Database = {
           fingerprint: string
           id?: string
           last_seen_at?: string | null
+          last_seq?: number
           name?: string
           owner_id?: string | null
           permission?: Database["public"]["Enums"]["permission_mode"]
@@ -93,6 +98,7 @@ export type Database = {
           fingerprint?: string
           id?: string
           last_seen_at?: string | null
+          last_seq?: number
           name?: string
           owner_id?: string | null
           permission?: Database["public"]["Enums"]["permission_mode"]
