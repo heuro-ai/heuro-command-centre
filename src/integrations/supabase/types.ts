@@ -22,7 +22,7 @@ export type Database = {
           id: number
           mission_id: string | null
           occurred_at: string
-          owner_id: string
+          owner_id: string | null
           payload: Json
           received_at: string
         }
@@ -33,7 +33,7 @@ export type Database = {
           id?: number
           mission_id?: string | null
           occurred_at?: string
-          owner_id: string
+          owner_id?: string | null
           payload?: Json
           received_at?: string
         }
@@ -44,7 +44,7 @@ export type Database = {
           id?: number
           mission_id?: string | null
           occurred_at?: string
-          owner_id?: string
+          owner_id?: string | null
           payload?: Json
           received_at?: string
         }
@@ -66,7 +66,7 @@ export type Database = {
           id: string
           last_seen_at: string | null
           name: string
-          owner_id: string
+          owner_id: string | null
           permission: Database["public"]["Enums"]["permission_mode"]
           profile: string | null
           secret_hash: string
@@ -80,7 +80,7 @@ export type Database = {
           id?: string
           last_seen_at?: string | null
           name?: string
-          owner_id: string
+          owner_id?: string | null
           permission?: Database["public"]["Enums"]["permission_mode"]
           profile?: string | null
           secret_hash: string
@@ -94,7 +94,7 @@ export type Database = {
           id?: string
           last_seen_at?: string | null
           name?: string
-          owner_id?: string
+          owner_id?: string | null
           permission?: Database["public"]["Enums"]["permission_mode"]
           profile?: string | null
           secret_hash?: string
@@ -109,7 +109,7 @@ export type Database = {
           claimed_at: string | null
           created_at: string
           expires_at: string
-          owner_id: string
+          owner_id: string | null
           token: string
         }
         Insert: {
@@ -117,7 +117,7 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           expires_at: string
-          owner_id: string
+          owner_id?: string | null
           token: string
         }
         Update: {
@@ -125,7 +125,7 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           expires_at?: string
-          owner_id?: string
+          owner_id?: string | null
           token?: string
         }
         Relationships: [
